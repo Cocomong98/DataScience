@@ -1,0 +1,18 @@
+---
+title: "Lab0_TeamC" 
+author: "21900251 Noah Ma 21900707 Young Woo Cho 21901015 Kim Yong Hyeon 22000108 Sooa Kim 22100321 Hanvi Park"
+date: "MM/DD/YYYY"
+output: 
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: vignette
+---
+
+#문제번호
+
+문제설명 
+
+```{r}
+cat("문제 풀이")
+```
+

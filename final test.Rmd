@@ -1,0 +1,22 @@
+---
+title: "MID_PRAC" 
+author: "21901015 김용현"
+date: "13/06/2023"
+output: 
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: vignette
+---
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+# 0 
+# 파일 불러오기
+```{r}
+load("/Users/cocomong_98/gemdata_finaltest.RData")
+train <- read.csv('/Users/cocomong_98/usedcar_train.csv')
+test <- read.csv('/Users/cocomong_98/usedcar_test_student.csv')
+```
+pums.sample

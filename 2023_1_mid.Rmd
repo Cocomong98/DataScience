@@ -1,0 +1,103 @@
+---
+title: "MID_2023_1" 
+author: "22100321 박한비 / 21901015 김용현 / 22000108 김수아 / 21900251 마노아"
+date: "19/04/2023"
+output: 
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: vignette
+---
+
+
+library(ggcorrplot)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+# 1
+# 파일 불러오기
+```{r}
+stu <- read.csv("/Users/cocomong_98/data.csv", sep=';')
+```
+
+**본 데이터는 csv 파일로 이루어져 있다. 그러므로 r에서 데이터프레임 형식으로 읽어오고 싶을 떄는 "넣을 데이터프레임 이름 <- read.csv("경로") 로 입력해주면 된다. 또한 작업을 마무리 한 뒤 str(데이터프레임)이나 head(데이터프레임) 등으로 열어보며 확인할 수 있다. 또한 이전에 csv 파일을 열어보았을 때, ;를 구분자로 모든 변수들이 한 덩어리가 된 것을 볼 수 있는데, 이를 해결하기 위해 read.csv에 구분자로 sep=';' 옵션을 추가해서 정상적인 csv 파일을 사용할 수 있다**
+
+# 2~3
+# 변수형 확인하기
+```{r}
+str(stu)
+```
+
+**변수들은 거의 num, int와 같은 숫자형 변수로 이루어져 있는데, 이들 중 다수는 변환이 필요해 보인다. 다음 줄부터 설명하겠다**
+
+```{r}
+names(stu)
+```
+
+**먼저 Marital.status는 결혼 여부를 나타내는 것으로, 1~5까지에 해당하는 값을 가진다. 따라서 이는 factor 형 변수가 어울린다**
+```{r}
+stu$Marital.status[stu$Marital.status == 1] <- "single"
+stu$Marital.status[stu$Marital.status == 2] <- "married"
+stu$Marital.status[stu$Marital.status == 3] <- "widower"
+stu$Marital.status[stu$Marital.status == 4] <- "divorced"
+stu$Marital.status[stu$Marital.status == 5] <- "facto union"
+stu$Marital.status[stu$Marital.status == 6] <- "legally separated"
+head(stu$Marital.status)
+```
+
+```{r}
+stu$Marital.status <- as.factor(stu$Marital.status)
+```
+**위와 같이 type이 Discrete 인 경우에는 (설명 웹페이지 기준) 각각의 숫자형 변수들이 숫자 그 자체의 값을 담고 있는것이 아닌, 각 숫자별로 해당하는 값을 갖는 역할을 하고 , 또한 그 종류가 갯수만큼의 다양성을 갖지 않는다. 다시 말하면 반복되고 구분되는 변수이므로, 이들은 모두 factor 형으로의 전환이 필요하여 보인다**
+
+**변수의 형태를 변형하는 방법은 다음과 같다 "바꿀 변수" <- as.factor(바꿀 변수)이다. 이 과정에서 NA를 처리하는 오류가 생길 수 있으니, 필요에 따라서는 NA를 제거하는 적옵 ex) na.rm = TRUE 등의 작업이 필요하다**
+
+**변환 과정은 전체 데이터프레임에서 Marital.status가 1~5인 경우들을 찾아 그 안의 변수값들을 변경해 주는 것이다. 이후 값을 확인해보면 정상적으로 바뀌었음을 알 수 있다.**
+
+
+
+#4
+
+**먼저, 입학성적과 중도이탈의 관련성을 알아보기 위해, stu의 변수들 중, 입학성적을 나타내는 Admission.grade와 중도탈락 여부를 묻는 Target 간의 상관관계를 조사하였다. 조사 도구로는 cor() 함수가 사용되었는데, 이는 입력 파라미터인 두 변수간의 상관관계를 알 수 있는 기능으로 단순히 양과 음이 아닌 그 정도에 따라서 결과를 알 수 있다. **
+```{r}
+cor(stu$Admission.grade, stu$Target == "Dropout")
+```
+**출력된 결과값은 -0.09580603으로, 이는 상관계수라고 불린다. +-0.2 미만이므로, 입학성적과 중도탈락의 정도는 큰 상관이 없다는 것을 알 수 있다. 이 방법은 0에서 1 사이의 결과가 나오는데, 1에 가까워질수록 높은 상관관계를, 0에 가까워질수록 낮은 상관관계를 갖는다**
+
+#5
+```{r}
+avggr<-stu$Curricular.units.1st.sem..grade.+ stu$Curricular.units.2nd.sem..grade.
+avgedu <-stu$Father.s.qualification+ stu$Mother.s.qualification
+avgqual <- stu$Father.s.occupation+stu$Mother.s.occupation
+cor(avggr,avgedu)
+cor(avggr,avgqual)
+```
+**먼저, 학생 성적의 평균을 구해야 한다. 학생 성적의 평균은 1학기와 2학기 (첫 해)으로 가린다고 하였으므로 두 학기의 성적을 더해서 성적 발급횟수로 나누고 (전체에 해당하기 때문), 거기에 2를 다시 나누어 주어야 한다.(두 학기 분량을 합한 것을 사용하기 때문이다). 이 결과는 avggr이라고 한다**
+
+**다음으로는 부모의 교육수준과 직업수준인데. 이는 직업을 나타내는 qualification과 직업 상태를 나타내는 occupation으로 나뉘어 있다. 두 변수 모드 factor 형 변수로 바꾸어주어야 하는 상태이지만, 계산을 위해 편의상 숫자가 높아질 수록 고등단계라고 가정한다.이 과정의 결과로 나오는 변수는 avgedu(교육수준), avgqual(직업수준) 으로 한다**
+
+**결과적으로 둘 다 상관관계를 조사히기 위해 cor를 씌웠을 때는 교육과의 상관관계 -0.02483161, 직업과의 상관관계 -0.01768673가 나옴을 알 수 있다. 이를 기반으로 학생의 성적은 부모의 교육수준과 조금 더 밀접한 관계가 있음을 알 수 있다**
+
+#6
+```{r}
+disschol<- cor(stu$Target == "Dropout",stu$Scholarship.holder)
+disschol
+cor(stu$Target == "Dropout",stu$Scholarship.holder)
+plot(stu$Target == "Dropout",stu$Scholarship.holder)
+```
+**첫 번째 예상은 중도포기와 장학금 간의 상관관계이다. 중도포기자는 성적이 낮거나 여러 이유로 학업에 집중하기 힘든 상태라고 보았기 때문에, 장학금과의 상관관계가 낮을 것으로 보았다. (이전에 서술한 중도포기와 장학금 지급자 여부인 Scholarship.holder 변수를 사용함. 장학금 지급시 1, 아닐시 0으로 표기). 결과는 -0.2453539로, 0.2 언저리였기 때문에 실제로 매우 적은 상관관계를 갖고 있음을 알 수 있다**
+
+```{r}
+ageschol<- cor(stu$Age.at.enrollment,stu$Scholarship.holder)
+ageschol
+plot(stu$Age.at.enrollment,stu$Scholarship.holder)
+```
+
+**두 번째 예상은 학생 등록 연령과 장학금 지급의 여부이다. 예상은 늦게 등록한 학생들은 그만큼 머리가 굳은 상태에서 시작하지만, 열심히 공부하고. 이르게 들어온 학생들은 처음 배우는 지식이니만큼 이해력이 빠를 것이라고 예상해 둘 사이의 상관관계를 낮게 보았다. 그리고 실제로 결과는 0.2 보다 못 미치는 수준으로. 상관관계가 없다고 나왔으나, 수치상으로 0.2에 근접한 모습을 보여주었다.**
+
+#7
+```{r}
+deb_dro <- cor(stu$Debtor, stu$Target == "Dropout")
+deb_dro
+```
+**첫 번째 대상은 빛이 있는 학생들과 중도포기 여부의 상관관계이다. 0.2가 넘어가는 수치를 보여주므로 약함~다소 높음 정도의 상관관계를 가지고 있음을 알 수 있다. 아마도 빛이 금전적인 문제를 일으켜 중도포기확률을 높였다던지 등의 이유가 있음을 알 수 있다. 따라서 학교는 이런 학생들에 대한 지원을 강화해야 할 것이다. 보통 금전적인 여유가 없는 경우에는 단순히 식사 등의 일이 어려움을 넘어서, 생계 유지를 위한 시간을 써야 해 남들보다 성적이 낮아지고, 근본적으로 공부에 집중할 시간이 적어짐을 말하기도 한다. 개인적인 경험을 빗대어 표현하자면, "나만 학교를 두 개 다니는 기분" 이 듦을 알 수 있었다. 물론 더 열심히 공부해 장학금을 타겠다는 희망을 가지고 공부하는 경우는 있어 상관관계가 아주 적지는 않다**

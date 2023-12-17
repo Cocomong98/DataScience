@@ -1,0 +1,152 @@
+---
+title: "MID_PRAC" 
+author: "21901015 김용현"
+date: "19/04/2023"
+output: 
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: vignette
+---
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+# 0 
+# 파일 불러오기
+```{r}
+load("/Users/cocomong_98/midterm2020.rdata")
+```
+pums.sample
+
+#1
+```{r}
+str(pums.sample)
+```
+
+#2
+#변경하기
+```{r}
+pums.sample$SEX[pums.sample$SEX == 1] <- "Male"
+pums.sample$SEX[pums.sample$SEX == 2] <- "Female"
+str(pums.sample)
+```
+
+```{r}
+pums.sample$SEX <- as.factor(pums.sample$SEX)
+```
+#3
+```{r}
+pums.sample$MAR[pums.sample$MAR == 1] <- "Married"
+pums.sample$MAR[pums.sample$MAR == 2] <- "Widowed"
+pums.sample$MAR[pums.sample$MAR == 3] <- "Divorced"
+pums.sample$MAR[pums.sample$MAR == 4] <- "Separated"
+pums.sample$MAR[pums.sample$MAR == 5] <- "Never married or under 15 years old"
+```
+# factor로 변경
+# 이유는?  : 변수들 안에서 1~5번에 해당하는 값이 반복해서 출력되므로, factor에 적합하다고 판단. 또한 기존의 정수형 변수는 계산에 어려움을 줄 수 있음
+```{r}
+pums.sample$MAR <- as.factor(pums.sample$MAR)
+```
+
+
+#4
+colSums(is.na(pums.sample))
+
+fer_rate <- sum(is.na(pums.sample$FER))/length(pums.sample$FER)
+fer_rate
+
+jwm_rate <- sum(is.na(pums.sample$JWMNP))/length(pums.sample$JWMNP)
+jwm_rate
+
+#5
+# 남성
+# FER이 NA인 경우의 개수
+length(pums.sample$SEX == "Male")
+sum(is.na(pums.sample$FER) & pums.sample$SEX == "Male")
+# FER이 NA가 아닌 경우의 개수
+sum(!is.na(pums.sample$FER) & pums.sample$SEX == "Male")
+
+#15세이하 여성
+# FER이 NA인 경우의 개수
+sum(is.na(pums.sample$FER) & pums.sample$SEX == "Female" & pums.sample$AGEP < 15)
+# FER이 NA가 아닌 경우의 개수
+sum(!is.na(pums.sample$FER) & pums.sample$SEX == "Female" & pums.sample$AGEP < 15)
+
+#50세 초과 여성
+length(pums.sample$SEX == "Female" & pums.sample$AGEP > 50)
+# FER이 NA인 경우의 개수
+sum(is.na(pums.sample$FER) & pums.sample$SEX == "Female" & pums.sample$AGEP > 50)
+# FER이 NA가 아닌 경우의 개수
+sum(!is.na(pums.sample$FER) & pums.sample$SEX == "Female" & pums.sample$AGEP > 50)
+
+#6
+```{r}
+str(pums.sample)
+boxplot(pums.sample$PINCP)
+boxplot(pums.sample$AGEP)
+boxplot(pums.sample$WKHP)
+boxplot(pums.sample$JWMNP)
+```
+
+ Question 7
+교육수준(SCHL)과 종사업종(COW)를 비교해보시오. 교육수준에 따라 종사업종의 종류나 비율이 어떻게 달라지는지 (혹은 달라지지 않는지) 확인하고 설명하시오
+```{r}
+table(pums.sample$COW, pums.sample$SCHL)
+```
+
+# Question 8
+나이대별 소득을 비교해보시오. 20대, 30대, 40대, 50대, 60대 이상, 5개의 그룹으로 나누어 각 나이 그룹별 평균 소득을 비교해보시오. (20세보다 어린 사람이 있다면 20대에추가하세요.) 가장 소득이 높은 그룹과 가장 소득이 낮은 그룹은 어디인가요?
+```{r}
+pums.sample$age_grp<-cut(pums.sample$AGEP,breaks=c(0,30,40,50,60,max(pums.sample$AGEP)),labels = c("20's","30's","40's","50's","60's over "),include.lowest =T)
+aggregate(PINCP~age_grp,data =pums.sample,mean)
+```
+소득이 가장 높은 그룹은 50대이고, 소득이 가장 낮은 그룹은 20대이다.
+
+# Question 9
+근무시간(WKHP)과 소득(PINCP)과 어떤 관계가 있는지 그래프를 그려 확인해보시
+오. 그래프에 관계가 나타난다면 그것을 설명해보시오
+
+```{r}
+plot(x = pums.sample$WKHP, y =pums.sample$PINCP,  col='darkgreen')
+
+```
+##2.Data Transformation
+
+# Question 10
+```{r}
+iris.wide <- gather(iris, len, Length, c(1,3))[, c(4,5)]
+
+iris.wide <- cbind(iris.wide, gather(iris, wid, Width, 
+c(2,4))[,3:5])
+
+iris.wide <- iris.wide[,c(3, 1, 4, 2, 5)]
+
+Part <- ifelse(str_detect(iris.wide$len, "Sepal"), "Sepal", "Petal")
+
+iris.wide <- cbind(iris.wide[,1:3], Part, iris.wide[,4:5])
+
+iris.wide <- iris.wide[,c(-2, -3)]
+
+iris.wide <- iris.wide[order(iris.wide$Part, decreasing = F), ]
+
+rownames(iris.wide) <-NULL # 인덱스 재설정
+
+head(iris.wide, 10)
+
+str(iris.wide)
+
+```
+
+#7
+
+
+#8
+
+
+#9
+
+
+#10
+
+

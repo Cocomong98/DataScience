@@ -1,0 +1,115 @@
+---
+title: "MID_PRAC" 
+author: "21901015 김용현"
+date: "19/04/2023"
+output: 
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: vignette
+---
+
+```{r}
+
+```
+# 0 
+# 파일 불러오기
+```{r}
+covid <- read.csv("/Users/cocomong_98/owid-covid-data.csv")
+about_covid <- read.csv("/Users/cocomong_98/owid-covid-codebook.csv")
+```
+
+# 1
+# 국가의 수는?
+```{r}
+count_nation <- unique(covid$location)
+length(count_nation)
+```
+# 국가의 수는 215개임 (중복 제외))
+
+# 대륙별 국가의 수는? 
+```{r}
+count_continent <- unique(covid$continent)
+count_continent
+
+asia_count <- unique(covid$location[covid$continent == 'Asia'])
+length(asia_count)
+
+eur_count <- unique(covid$location[covid$continent == 'Europe'])
+length(eur_count)
+
+afg_count <- unique(covid$location[covid$continent == 'Africa'])
+length(afg_count)
+
+notrha_count <- unique(covid$location[covid$continent == 'North America'])
+length(notrha_count)
+
+southa_count <- unique(covid$location[covid$continent == 'South America'])
+length(southa_count)
+
+oce_count <- unique(covid$location[covid$continent == 'Oceania'])
+length(oce_count)
+
+unkown_count <- unique(covid$location[covid$continent == ''])
+length(unkown_count)
+```
+# 데이터 수집 기간은? 
+```{r}
+max(covid$date)
+min(covid$date)
+```
+
+
+
+#2 
+#결측값 비율 따라 변수 구분하기
+# 변수별 결측값 개수 
+```{r}
+colSums(is.na(covid))
+```
+
+
+# 결과값은 0과 1 사이의 비율이다
+```{r}
+colMeans(is.na(covid))
+sort(colMeans(is.na(covid)), decreasing = TRUE)
+```
+
+# 이유는?
+
+# 3
+# 특정 열을 0으로 
+# 접종자 (전과 후 비교)
+```{r}
+sum(is.na(covid$total_vaccinations))
+covid$total_vaccinations[covid$date < "2020-09-01" & is.na(covid$total_vaccinations)] <- 0
+sum(is.na(covid$total_vaccinations))
+```
+
+#사망자 (전과 후 비교)
+```{r}
+sum(is.na(covid$total_deaths))
+covid$total_deaths[covid$date < "2020-09-01" & is.na(covid$total_deaths)] <- 0
+sum(is.na(covid$total_deaths))
+```
+
+#5 최근 날짜를 기준으로 확진, 사망, 확진율 탑 10을 뽑아라
+
+#확진
+
+```{r}
+rank_case <- rank(-covid$total_cases)
+rank_case <- unique(rank_case)
+case_top10 <- rank_case %in% 1:10
+res_case <- unique(covid$location[case_top10])
+res_case
+```
+
+
+#사망
+```{r}
+rank_death <- rank(-covid$total_deaths)
+rank_death <- unique(rank_death)
+rank_death <- rank_death[1:10]
+rank_death
+```
+
